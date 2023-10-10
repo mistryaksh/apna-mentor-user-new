@@ -1,0 +1,112 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.scrollbar-hide::-webkit-scrollbar {
+     display: none;
+}
+
+.rdt_Table {
+     font-family: theme("fontFamily.sans") !important;
+}
+
+.rdt_TableHeadRow {
+     background-color: theme("backgroundColor.secondary.100") !important;
+     color: theme("textColor.gray.500") !important;
+     border-top-right-radius: 10px !important;
+     border-top-left-radius: 10px !important;
+     font-weight: theme("fontWeight.semibold");
+}
+
+.rdt_TableRow:hover {
+     background: theme("backgroundColor.secondary.50") !important;
+}
+
+.rdt_TableHeadRow {
+     text-transform: capitalize;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+     -webkit-appearance: none;
+     margin: 0;
+}
+
+/* For IE, Edge and Firefox */
+.scrollbar-hide {
+     -ms-overflow-style: none; /* IE and Edge */
+     scrollbar-width: 3px; /* Firefox */
+}
+.react-calendar__navigation__prev2-button {
+     display: none !important;
+     color: theme("colors.secondary.500") !important;
+     font-size: 24px;
+}
+
+.react-calendar__navigation__next2-button {
+     display: none !important;
+}
+
+.react-calendar__navigation__prev-button {
+     color: theme("colors.secondary.500") !important;
+     font-size: 30px;
+}
+
+.react-calendar__navigation__next-button {
+     color: theme("colors.secondary.500") !important;
+     font-size: 30px;
+}
+
+.react-calendar {
+     border: 0px !important;
+     font-family: theme("fontFamily.roboto") !important;
+}
+
+.react-calendar__month-view__weekdays {
+     color: theme("colors.gray.500") !important;
+     font-weight: theme("fontWeight.normal") !important;
+     text-decoration: none !important;
+}
+
+.react-calendar__tile--now {
+     background: theme("backgroundColor.secondary.100") !important;
+}
+
+.react-calendar__tile--active {
+     background-color: theme("backgroundColor.secondary.500") !important;
+}
+
+.react-calendar__tile--rangeStart {
+     border-top-left-radius: 8px;
+     border-bottom-left-radius: 8px;
+}
+.react-calendar__tile--rangeEnd {
+     border-top-right-radius: 8px;
+     border-bottom-right-radius: 8px;
+}
+.react-calendar__tile {
+     color: theme("backgroundColor.black") !important;
+}
+
+.react-calendar__tile:disabled {
+     color: theme("backgroundColor.gray.500") !important;
+     background-color: theme("backgroundColor.white") !important;
+}
+
+.react-calendar__navigation__label__labelText {
+     color: theme("colors.secondary.500");
+     text-transform: uppercase;
+     border-radius: theme("borderRadius.lg");
+}
+
+.react-calendar__navigation__next-button:disabled {
+     background-color: theme("backgroundColor.white") !important;
+     color: theme("textColor.gray.500") !important;
+     border-radius: theme("borderRadius.lg");
+}
+
+video {
+     border-radius: theme("borderRadius.lg");
+}
