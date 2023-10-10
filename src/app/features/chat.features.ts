@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 import { RootState } from "../hooks";
-import { v4 as uuIdV4 } from "uuid";
 
 export interface initialStateProps {
      roomId: string | null;

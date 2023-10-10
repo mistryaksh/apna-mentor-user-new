@@ -9,7 +9,14 @@ import { AiOutlineCopy, AiOutlineSend, AiOutlineToTop } from "react-icons/ai";
 import clsx from "clsx";
 import moment from "moment";
 import { useNavigate, useParams } from "react-router-dom";
-import { handleDeclineCall, handleMeetingId, handleMentorMeetingId, useVideoChatSlice } from "../../../../app/features";
+import {
+     handleAcceptCall,
+     handleDeclineCall,
+     handleMeetingId,
+     handleMentorMeetingId,
+     useMentorLayoutSlice,
+     useVideoChatSlice,
+} from "../../../../app/features";
 import { useAppDispatch } from "../../../../app/";
 import { SocketIo } from "../../../../service/video-call.api";
 
@@ -140,7 +147,7 @@ function MentorMeetingView({
 }) {
      var topic = "CHAT";
      const { end } = useMeeting();
-
+     const dispatch = useAppDispatch();
      const { publish, messages } = usePubSub(topic);
      const [joined, setJoined] = useState<string | null>(null);
      //Get the method which will be used to join the meeting.
@@ -174,7 +181,10 @@ function MentorMeetingView({
      const [message, setMessage] = useState<string>("");
      const OnMeetingEnd = () => {
           end();
+          dispatch(handleAcceptCall({ token: null, meetingId: null }));
+          dispatch(handleDeclineCall());
           SocketIo.emit("END_MEETING", meetingId);
+
           navigate("/mentor/my-calls", { replace: true });
      };
      return (
@@ -185,7 +195,7 @@ function MentorMeetingView({
                               {/* For rendering all the participants in the meeting */}
                               <div className="flex flex-col-reverse gap-5 h-full w-full">
                                    {[...(participants.keys() as any)].map((participantId) => (
-                                        <div>
+                                        <div key={participantId}>
                                              <MentorParticipantView
                                                   meetingId={meetingId}
                                                   userName={userName}
@@ -313,13 +323,15 @@ export const MentorJoinPage = () => {
      // const [roomId, setRoomId] = useState<string | null>(null);
      const dispatch = useAppDispatch();
      const { token } = useVideoChatSlice();
+     const { mentorToken } = useMentorLayoutSlice();
      const { meetingId } = useParams();
      const { data: doctor } = useMentorProfileQuery();
      const userName = `${doctor?.data.name.firstName} ${doctor?.data.name.lastName}`;
 
      useEffect(() => {
           dispatch(handleDeclineCall());
-     }, [meetingId, dispatch]);
+          dispatch(handleMentorMeetingId({ mentorMeeting: meetingId, mentorToken: token }));
+     }, [meetingId, dispatch, token]);
      //This will set Meeting Id to null when meeting is left or ended
      const onMeetingLeave = () => {
           dispatch(handleMeetingId(null));
@@ -329,7 +341,7 @@ export const MentorJoinPage = () => {
           <MentorLayout fullScreenMode>
                <div className="flex border h-screen w-screen">
                     <div className="flex w-full h-full border">
-                         {meetingId && token && (
+                         {meetingId && mentorToken && (
                               <div>
                                    {meetingId ? (
                                         <MeetingProvider
@@ -339,11 +351,11 @@ export const MentorJoinPage = () => {
                                                   webcamEnabled: true,
                                                   name: userName,
                                              }}
-                                             token={token || ""}
+                                             token={mentorToken}
                                         >
                                              <MentorMeetingView
                                                   userName={userName}
-                                                  meetingId={meetingId}
+                                                  meetingId={meetingId as string}
                                                   onMeetingLeave={onMeetingLeave}
                                              />
                                         </MeetingProvider>

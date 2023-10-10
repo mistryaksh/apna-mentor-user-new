@@ -6,6 +6,7 @@ import { UserProps } from "../../interface";
 interface initialStateProps {
      sideBar: boolean;
      mentorMeeting: string | null;
+     mentorToken: string | null;
      callReceived: boolean;
      CallAccepted?: boolean;
      callStateData?: {
@@ -17,6 +18,7 @@ const initialState: initialStateProps = {
      sideBar: true,
      mentorMeeting: null,
      callReceived: false,
+     mentorToken: null,
 };
 
 const MentorLayoutSlice = createSlice({
@@ -27,7 +29,7 @@ const MentorLayoutSlice = createSlice({
                state.sideBar = !state.sideBar;
           },
           handleMentorMeetingId: (state, action) => {
-               state.mentorMeeting = action.payload;
+               state.mentorMeeting = action.payload.meetingId;
           },
           handleCallReceived: (state) => {
                state.callReceived = !state.callReceived;
@@ -39,11 +41,11 @@ const MentorLayoutSlice = createSlice({
           },
           handleAcceptCall: (state, action) => {
                state.CallAccepted = true;
-               state.mentorMeeting = action.payload as string;
+               state.mentorToken = action.payload.token;
+               state.mentorMeeting = action.payload.meetingId as string;
           },
           handleDeclineCall: (state) => {
                state.CallAccepted = false;
-               state.mentorMeeting = null;
           },
      },
 });

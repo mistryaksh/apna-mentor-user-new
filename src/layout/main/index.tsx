@@ -2,10 +2,17 @@ import { FC, ReactNode, useEffect } from "react";
 import { AiOutlineLoading } from "react-icons/ai";
 import { AppButton, AppNavLink } from "../../component";
 import { Transition } from "@headlessui/react";
-import { UserLogoutState, handleNavbar, useAccountSlice, useLayoutSlice } from "../../app/features";
+import {
+     UserLogoutState,
+     handleNavbar,
+     handleToken,
+     useAccountSlice,
+     useLayoutSlice,
+     useVideoChatSlice,
+} from "../../app/features";
 import { useAppDispatch } from "../../app/";
 import { useNavigate } from "react-router-dom";
-import { useLogoutToAccountMutation } from "../../app/apis";
+import { useGenerateTokenMutation, useLogoutToAccountMutation } from "../../app/apis";
 import { toast } from "react-toastify";
 
 export interface MainLayoutProps {
@@ -70,8 +77,11 @@ export const MainLayout: FC<MainLayoutProps> = ({ children, loading, mode }) => 
      const { navBar } = useLayoutSlice();
      const { user } = useAccountSlice();
      const dispatch = useAppDispatch();
+     const { token } = useVideoChatSlice();
      const navigate = useNavigate();
      const [Logout, { isError, error, isSuccess, data }] = useLogoutToAccountMutation();
+     const [GenerateToken, { data: tokenData, isError: isTokenError, error: tokenError, isSuccess: isTokenSuccess }] =
+          useGenerateTokenMutation();
 
      useEffect(() => {
           if (isError) {
@@ -86,7 +96,35 @@ export const MainLayout: FC<MainLayoutProps> = ({ children, loading, mode }) => 
                dispatch(UserLogoutState());
                navigate("/", { replace: true });
           }
-     }, [isError, error, isSuccess, data, dispatch, navigate]);
+          if (!token) {
+               (async () => {
+                    await GenerateToken();
+               })();
+          }
+          if (isTokenError) {
+               if ((tokenError as any).data) {
+                    toast.error((tokenError as any).data.message);
+               } else {
+                    toast.error((tokenError as any).message);
+               }
+          }
+          if (isTokenSuccess) {
+               dispatch(handleToken(tokenData.data));
+          }
+     }, [
+          isError,
+          error,
+          isSuccess,
+          data,
+          dispatch,
+          navigate,
+          isTokenError,
+          tokenError,
+          isTokenSuccess,
+          tokenData,
+          GenerateToken,
+          token,
+     ]);
 
      const onLogout = async () => {
           await Logout();

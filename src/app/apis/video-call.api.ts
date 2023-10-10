@@ -1,15 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { authToken } from "../../service/video-call.api";
 
 const videoCallApi = createApi({
      reducerPath: "videoCallApi",
      baseQuery: fetchBaseQuery({
-          baseUrl: "http://localhost:8080/api/1.0",
-          prepareHeaders: (header: Headers) => {
-               header.set("Authorization", `${authToken}`);
-          },
+          baseUrl: process.env.REACT_APP_URL,
      }),
-     endpoints: ({ mutation, query }) => ({
+     endpoints: ({ mutation }) => ({
           GenerateToken: mutation<any, void>({
                query: () => {
                     return {
@@ -27,6 +23,7 @@ const videoCallApi = createApi({
                          body: {
                               token,
                          },
+                         headers: {},
                     };
                },
           }),

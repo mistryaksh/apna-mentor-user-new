@@ -2,12 +2,13 @@ import { useMeeting, usePubSub } from "@videosdk.live/react-sdk";
 import { FC, useEffect, useRef, useState } from "react";
 import { UserParticipantView } from "../participate-view";
 import { useAppDispatch } from "../../../app/";
-import { handleJoined } from "../../../app/features";
+import { handleJoined, handleMeetingId } from "../../../app/features";
 import { AiOutlineSend, AiOutlineToTop } from "react-icons/ai";
 import { toast } from "react-toastify";
 import clsx from "clsx";
 import { AppButton } from "../../../component";
 import moment from "moment";
+import { useNavigate } from "react-router-dom";
 
 export interface UserMeetingViewProps {
      onMeetingLeave: () => void;
@@ -28,6 +29,7 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({
      const messagesEndRef = useRef(null) as any;
      const { leave } = useMeeting();
 
+     const navigate = useNavigate();
      const { publish, messages } = usePubSub(topic);
      const dispatch = useAppDispatch();
      //Get the method which will be used to join the meeting.
@@ -39,7 +41,9 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({
           },
           //callback for when meeting is left
           onMeetingLeft: () => {
+               dispatch(handleMeetingId(null));
                onMeetingLeave();
+               navigate("/", { replace: true });
           },
      });
 
@@ -71,7 +75,7 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({
                          {/* For rendering all the participants in the meeting */}
                          <div className="flex-1 flex flex-col-reverse gap-5  justify-end bg-gray-100 rounded-lg h-[100%]">
                               {[...(participants.keys() as any)].map((participantId) => (
-                                   <div>
+                                   <div key={participantId}>
                                         <UserParticipantView
                                              meetingId={meetingId}
                                              userName={userName}

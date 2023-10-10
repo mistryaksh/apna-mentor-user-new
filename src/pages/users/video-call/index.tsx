@@ -18,7 +18,6 @@ export const UserVideoCallPage = () => {
      const { meetingId, mic, videoCamera, joined, token } = useVideoChatSlice();
      const dispatch = useAppDispatch();
      const navigate = useNavigate();
-
      const [
           CreateMeeting,
           { data: meetingData, isError: isMeetingError, error: meetingError, isSuccess: isMeetingSuccess },
@@ -54,27 +53,28 @@ export const UserVideoCallPage = () => {
                          doctorId,
                          roomId: meetingData?.data?.roomId,
                          userId: user?.data._id,
+                         token: token,
                     });
                }
           }
      }, [
-          isError,
-          error,
-          doctorId,
           Profile,
           dispatch,
-          user,
+          doctorId,
+          error,
+          isError,
           isMeetingError,
           meetingError,
           isMeetingSuccess,
           meetingData,
           meetingId,
+          user,
           token,
      ]);
 
      const StartJoinMeeting = async () => {
           if (!token) {
-               toast.error("please click again");
+               toast.error("Something went wrong please contact to admin");
           } else {
                await CreateMeeting(token!);
           }

@@ -7,10 +7,12 @@ import {
      handleCallReceived,
      handleDeclineCall,
      handleSideBar,
+     handleToken,
      useMentorLayoutSlice,
+     useVideoChatSlice,
 } from "../../app/features";
 import { useAppDispatch } from "../../app/";
-import { useMentorLogoutMutation, useMentorProfileQuery } from "../../app/apis";
+import { useGenerateTokenMutation, useMentorLogoutMutation, useMentorProfileQuery } from "../../app/apis";
 import { AppButton, SideNavLink } from "../../component";
 import { toast } from "react-toastify";
 import clsx from "clsx";
@@ -38,8 +40,11 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
      const { sideBar, callReceived, callStateData, mentorMeeting, CallAccepted } = useMentorLayoutSlice();
      const navigate = useNavigate();
      const dispatch = useAppDispatch();
+     const { token } = useVideoChatSlice();
      const [Logout, { data, isError, error, isSuccess, isLoading }] = useMentorLogoutMutation();
      const { data: mentorProfile } = useMentorProfileQuery();
+     const [GenerateToken, { data: tokenData, isError: isTokenError, error: tokenError, isSuccess: isTokenSuccess }] =
+          useGenerateTokenMutation();
 
      const toggleNavbar = () => {
           dispatch(handleSideBar());
@@ -64,12 +69,44 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
           }
           SocketIo.on("THROW_CALL_REQUEST", async (data: any) => {
                if (data.data.doctorId === mentorProfile?.data._id) {
-                    dispatch(handleAcceptCall(data.data.roomId));
+                    dispatch(handleAcceptCall({ meetingId: data.data.roomId, token: data.data.token }));
                     dispatch(handleCallReceived());
                     dispatch(handleCallData(data.user as UserProps));
                }
           });
-     }, [isSuccess, isError, error, navigate, dispatch, data, mentorProfile, callReceived, CallAccepted]);
+
+          if (!token) {
+               (async () => {
+                    await GenerateToken();
+               })();
+          }
+          if (isTokenError) {
+               if ((tokenError as any).data) {
+                    toast.error((tokenError as any).data.message);
+               } else {
+                    toast.error((tokenError as any).message);
+               }
+          }
+          if (isTokenSuccess) {
+               dispatch(handleToken(tokenData.data));
+          }
+     }, [
+          isSuccess,
+          isError,
+          error,
+          navigate,
+          dispatch,
+          data,
+          mentorProfile,
+          callReceived,
+          CallAccepted,
+          token,
+          GenerateToken,
+          isTokenError,
+          tokenError,
+          isTokenSuccess,
+          tokenData,
+     ]);
 
      const AcceptCall = () => {
           navigate(`/mentor/join-mentor-meeting/${mentorMeeting}`);
