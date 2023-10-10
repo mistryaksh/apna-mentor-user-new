@@ -297,7 +297,7 @@ interface ControlProps {
      participate: string;
 }
 
-const Controls: FC<ControlProps> = ({ webcamOn, micOn, participate }) => {
+const Controls: FC<ControlProps> = ({ webcamOn, micOn }) => {
      const { toggleMic, toggleWebcam } = useMeeting();
      return (
           <div className="flex gap-5 items-center">
@@ -323,7 +323,6 @@ export const MentorJoinPage = () => {
      // const [roomId, setRoomId] = useState<string | null>(null);
      const dispatch = useAppDispatch();
      const { token } = useVideoChatSlice();
-     const { mentorToken } = useMentorLayoutSlice();
      const { meetingId } = useParams();
      const { data: doctor } = useMentorProfileQuery();
      const userName = `${doctor?.data.name.firstName} ${doctor?.data.name.lastName}`;
@@ -341,28 +340,26 @@ export const MentorJoinPage = () => {
           <MentorLayout fullScreenMode>
                <div className="flex border h-screen w-screen">
                     <div className="flex w-full h-full border">
-                         {meetingId && mentorToken && (
+                         {meetingId && token ? (
                               <div>
-                                   {meetingId ? (
-                                        <MeetingProvider
-                                             config={{
-                                                  meetingId: meetingId || "",
-                                                  micEnabled: true,
-                                                  webcamEnabled: true,
-                                                  name: userName,
-                                             }}
-                                             token={mentorToken}
-                                        >
-                                             <MentorMeetingView
-                                                  userName={userName}
-                                                  meetingId={meetingId as string}
-                                                  onMeetingLeave={onMeetingLeave}
-                                             />
-                                        </MeetingProvider>
-                                   ) : (
-                                        <div>no meeting ID provided</div>
-                                   )}
+                                   <MeetingProvider
+                                        config={{
+                                             meetingId: meetingId || "",
+                                             micEnabled: true,
+                                             webcamEnabled: true,
+                                             name: userName,
+                                        }}
+                                        token={token}
+                                   >
+                                        <MentorMeetingView
+                                             userName={userName}
+                                             meetingId={meetingId as string}
+                                             onMeetingLeave={onMeetingLeave}
+                                        />
+                                   </MeetingProvider>
                               </div>
+                         ) : (
+                              <div>no meeting ID & token provided</div>
                          )}
                     </div>
                </div>

@@ -42,7 +42,6 @@ const MentorLayoutSlice = createSlice({
           handleAcceptCall: (state, action) => {
                state.CallAccepted = true;
                state.mentorToken = action.payload.token;
-               state.mentorMeeting = action.payload.meetingId as string;
           },
           handleDeclineCall: (state) => {
                state.CallAccepted = false;
