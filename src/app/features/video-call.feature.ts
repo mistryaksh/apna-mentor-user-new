@@ -30,7 +30,7 @@ const VideoChat = createSlice({
                state.mic = !state.mic;
           },
           handleMeetingId: (state, action) => {
-               state.meetingId = action.payload?.roomId;
+               state.meetingId = action.payload;
           },
           handleJoined: (state, action) => {
                state.joined = action.payload;

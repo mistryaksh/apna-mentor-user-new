@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 import { MentorLayout } from "../../../../layout";
 import { MeetingProvider, useMeeting, useParticipant, usePubSub } from "@videosdk.live/react-sdk";
-import { useMentorProfileQuery } from "../../../../app/apis";
+import { useMentorProfileQuery, useValidateRoomMutation } from "../../../../app/apis";
 
 import ReactPlayer from "react-player";
 import { BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute } from "react-icons/bs";
@@ -13,12 +13,14 @@ import {
      handleAcceptCall,
      handleDeclineCall,
      handleMeetingId,
-     handleMentorMeetingId,
+     handleMeetingValidation,
      useMentorLayoutSlice,
      useVideoChatSlice,
 } from "../../../../app/features";
 import { useAppDispatch } from "../../../../app/";
 import { SocketIo } from "../../../../service/video-call.api";
+import { toast } from "react-toastify";
+import { CallProvider } from "../../../../component";
 
 function MentorParticipantView({
      participantId,
@@ -150,12 +152,14 @@ function MentorMeetingView({
      const dispatch = useAppDispatch();
      const { publish, messages } = usePubSub(topic);
      const [joined, setJoined] = useState<string | null>(null);
+
      //Get the method which will be used to join the meeting.
      //We will also get the participants list to display all participants
      const { join, participants } = useMeeting({
           //callback for when meeting is joined successfully
           onMeetingJoined: () => {
                setJoined("JOINED");
+               SocketIo.emit("ACCEPTED_CALL", meetingId);
           },
           //callback for when meeting is left
           onMeetingLeft: () => {
@@ -165,14 +169,10 @@ function MentorMeetingView({
      const navigate = useNavigate();
 
      useEffect(() => {
-          if (!meetingId) {
-               setJoined(null);
-          } else {
+          if (meetingId) {
                join();
-               setJoined("JOINED");
-               SocketIo.emit("ACCEPTED_CALL", meetingId);
           }
-     }, []);
+     }, [meetingId]);
 
      const SendMessage = () => {
           publish(message, { persist: true });
@@ -181,10 +181,8 @@ function MentorMeetingView({
      const [message, setMessage] = useState<string>("");
      const OnMeetingEnd = () => {
           end();
-          dispatch(handleAcceptCall({ token: null, meetingId: null }));
           dispatch(handleDeclineCall());
           SocketIo.emit("END_MEETING", meetingId);
-
           navigate("/mentor/my-calls", { replace: true });
      };
      return (
@@ -322,19 +320,51 @@ const Controls: FC<ControlProps> = ({ webcamOn, micOn }) => {
 export const MentorJoinPage = () => {
      // const [roomId, setRoomId] = useState<string | null>(null);
      const dispatch = useAppDispatch();
+     const { data: mentor } = useMentorProfileQuery();
      const { token } = useVideoChatSlice();
+     const { meetingIsValid } = useMentorLayoutSlice();
      const { meetingId } = useParams();
      const { data: doctor } = useMentorProfileQuery();
      const userName = `${doctor?.data.name.firstName} ${doctor?.data.name.lastName}`;
+     const [
+          ValidateMeetingIdAndToken,
+          { isError: isValidateError, error: validateError, isSuccess: isValidateSuccess, data: validateData },
+     ] = useValidateRoomMutation();
 
      useEffect(() => {
           dispatch(handleDeclineCall());
-          dispatch(handleMentorMeetingId({ mentorMeeting: meetingId, mentorToken: token }));
-     }, [meetingId, dispatch, token]);
+          if (meetingId && token && !meetingIsValid) {
+               (async () => {
+                    await ValidateMeetingIdAndToken({ meetingId, token });
+               })();
+          }
+          if (isValidateSuccess) {
+               if (validateData?.data?.roomId) {
+                    dispatch(handleMeetingValidation());
+               }
+          }
+
+          if (isValidateError) {
+               if ((validateError as any).data) {
+                    toast.error((validateError as any).data.message);
+               } else {
+                    toast.error((validateError as any).message);
+               }
+          }
+     }, [
+          meetingId,
+          dispatch,
+          token,
+          ValidateMeetingIdAndToken,
+          isValidateSuccess,
+          validateError,
+          isValidateError,
+          meetingIsValid,
+          validateData,
+     ]);
      //This will set Meeting Id to null when meeting is left or ended
      const onMeetingLeave = () => {
           dispatch(handleMeetingId(null));
-          dispatch(handleMentorMeetingId(null));
      };
      return (
           <MentorLayout fullScreenMode>
@@ -342,21 +372,19 @@ export const MentorJoinPage = () => {
                     <div className="flex w-full h-full border">
                          {meetingId && token ? (
                               <div>
-                                   <MeetingProvider
-                                        config={{
-                                             meetingId: meetingId || "",
-                                             micEnabled: true,
-                                             webcamEnabled: true,
-                                             name: userName,
-                                        }}
+                                   <CallProvider
+                                        meetingId={meetingId}
                                         token={token}
+                                        mic
+                                        webcam
+                                        username={`${mentor?.data.name.firstName} ${mentor?.data.name.lastName}`}
                                    >
                                         <MentorMeetingView
                                              userName={userName}
                                              meetingId={meetingId as string}
                                              onMeetingLeave={onMeetingLeave}
                                         />
-                                   </MeetingProvider>
+                                   </CallProvider>
                               </div>
                          ) : (
                               <div>no meeting ID & token provided</div>

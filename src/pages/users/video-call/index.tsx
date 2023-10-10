@@ -6,8 +6,7 @@ import { toast } from "react-toastify";
 import { handleMeetingId, handleMice, handleVideoCam, useVideoChatSlice } from "../../../app/features";
 import { useAppDispatch } from "../../../app/";
 import { BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute } from "react-icons/bs";
-import { AppButton } from "../../../component";
-import { MeetingProvider } from "@videosdk.live/react-sdk";
+import { AppButton, CallProvider } from "../../../component";
 import { UserMeetingView } from "../../video-call";
 import { SocketIo } from "../../../service/video-call.api";
 
@@ -47,14 +46,13 @@ export const UserVideoCallPage = () => {
           }
 
           if (isMeetingSuccess) {
-               dispatch(handleMeetingId(meetingData?.data));
-               if (meetingId) {
-                    SocketIo.emit("GET_CALL_REQUEST", {
-                         doctorId,
-                         roomId: meetingData?.data?.roomId,
-                         userId: user?.data._id,
-                         token: token,
-                    });
+               SocketIo.emit("GET_CALL_REQUEST", {
+                    doctorId,
+                    roomId: meetingData?.data?.roomId,
+                    userId: user?.data._id,
+               });
+               if (meetingData) {
+                    dispatch(handleMeetingId(meetingData?.data?.roomId));
                }
           }
      }, [
@@ -76,7 +74,7 @@ export const UserVideoCallPage = () => {
           if (!token) {
                toast.error("Something went wrong please contact to admin");
           } else {
-               await CreateMeeting(token!);
+               await CreateMeeting(token);
           }
      };
 
@@ -90,14 +88,12 @@ export const UserVideoCallPage = () => {
                     <div className="h-screen flex flex-col justify-center items-center">
                          {token && meetingId ? (
                               <div className="w-full h-full">
-                                   <MeetingProvider
+                                   <CallProvider
+                                        meetingId={meetingId}
                                         token={token}
-                                        config={{
-                                             meetingId: meetingId,
-                                             micEnabled: mic,
-                                             name: `${user?.data.name.firstName} ${user?.data.name.lastName}`,
-                                             webcamEnabled: videoCamera,
-                                        }}
+                                        mic={mic}
+                                        webcam={videoCamera}
+                                        username={`${user?.data.name.firstName} ${user?.data.name.lastName}`}
                                    >
                                         <div className="h-full w-full">
                                              <UserMeetingView
@@ -108,7 +104,7 @@ export const UserVideoCallPage = () => {
                                                   doctorName={`${doctor?.data.name.firstName} ${doctor?.data.name.lastName}`}
                                              />
                                         </div>
-                                   </MeetingProvider>
+                                   </CallProvider>
                               </div>
                          ) : (
                               <div className="w-[60%] p-5 shadow-lg rounded-lg border">

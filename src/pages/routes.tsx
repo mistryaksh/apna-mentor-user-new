@@ -19,17 +19,11 @@ import {
      MentorMyCallsPage,
      MentorJoinPage,
 } from "./";
-import { useAccountSlice, useVideoChatSlice } from "../app/features";
-import { useAppDispatch } from "../app/";
-import { useGenerateTokenMutation } from "../app/apis";
+import { useAccountSlice } from "../app/features";
+
 export const AppRoutes = () => {
      const { mentor, user } = useAccountSlice();
-     const { token } = useVideoChatSlice();
-     const dispatch = useAppDispatch();
-     const [GenerateToken, { data: tokenData, isError: isTokenError, error: tokenError, isSuccess: isTokenSuccess }] =
-          useGenerateTokenMutation();
 
-     useEffect(() => {}, [GenerateToken, token, isTokenError, tokenError, dispatch, isTokenSuccess, tokenData]);
      return (
           <Routes>
                <Route path="/" element={<Homepage />} />

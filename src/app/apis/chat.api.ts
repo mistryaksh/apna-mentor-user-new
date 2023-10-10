@@ -3,21 +3,37 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const chatApi = createApi({
      reducerPath: "chatApi",
      baseQuery: fetchBaseQuery({
-          baseUrl: process.env.REACT_APP_URL,
+          baseUrl: "https://truthful-amber-slip.glitch.me/api/1.0",
      }),
      endpoints: ({ query, mutation }) => ({
-          GetUserById: mutation({
-               query: (user) => {
+          CreateMeeting: mutation({
+               query: (token) => {
+                    console.log(token);
                     return {
-                         url: `/user/${user}`,
-                         method: "GET",
+                         url: "/create-meeting",
+                         method: "POST",
+                         body: {
+                              token: token,
+                         },
+                    };
+               },
+          }),
+          ValidateRoom: mutation({
+               query: ({ token, meetingId }) => {
+                    return {
+                         url: `/validate-meeting`,
+                         method: "POST",
+                         body: {
+                              meetingId,
+                              token,
+                         },
                     };
                },
           }),
      }),
 });
 
-export const { useGetUserByIdMutation } = chatApi;
+export const { useCreateMeetingMutation, useValidateRoomMutation } = chatApi;
 
 export const ChatApiReducer = chatApi.reducer;
 export const ChatApiMiddleware = chatApi.middleware;

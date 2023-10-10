@@ -69,7 +69,8 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
           }
           SocketIo.on("THROW_CALL_REQUEST", async (data: any) => {
                if (data.data.doctorId === mentorProfile?.data._id) {
-                    dispatch(handleAcceptCall({ meetingId: data.data.roomId, token: data.data.token }));
+                    dispatch(handleAcceptCall(data.data.roomId));
+
                     dispatch(handleCallReceived());
                     dispatch(handleCallData(data.user as UserProps));
                }
@@ -77,7 +78,7 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
 
           if (!token) {
                (async () => {
-                    await GenerateToken();
+                    await GenerateToken("mentor");
                })();
           }
           if (isTokenError) {
@@ -88,7 +89,7 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
                }
           }
           if (isTokenSuccess) {
-               dispatch(handleToken(tokenData.data));
+               dispatch(handleToken(tokenData?.data));
           }
      }, [
           isSuccess,

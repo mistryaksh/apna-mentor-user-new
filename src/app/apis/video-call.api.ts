@@ -6,31 +6,21 @@ const videoCallApi = createApi({
           baseUrl: process.env.REACT_APP_URL,
      }),
      endpoints: ({ mutation }) => ({
-          GenerateToken: mutation<any, void>({
-               query: () => {
+          GenerateToken: mutation({
+               query: (role: string) => {
                     return {
                          url: "/generate-token",
                          method: "POST",
-                         body: {},
-                    };
-               },
-          }),
-          CreateMeeting: mutation({
-               query: (token: string) => {
-                    return {
-                         url: "/create-meeting",
-                         method: "POST",
                          body: {
-                              token,
+                              role: role,
                          },
-                         headers: {},
                     };
                },
           }),
      }),
 });
 
-export const { useGenerateTokenMutation, useCreateMeetingMutation } = videoCallApi;
+export const { useGenerateTokenMutation } = videoCallApi;
 
 export const VideoCallApiReducer = videoCallApi.reducer;
 export const VideoCallApiMiddleware = videoCallApi.middleware;

@@ -9,6 +9,7 @@ interface initialStateProps {
      mentorToken: string | null;
      callReceived: boolean;
      CallAccepted?: boolean;
+     meetingIsValid?: boolean;
      callStateData?: {
           callFrom: UserProps;
      };
@@ -28,9 +29,6 @@ const MentorLayoutSlice = createSlice({
           handleSideBar: (state) => {
                state.sideBar = !state.sideBar;
           },
-          handleMentorMeetingId: (state, action) => {
-               state.mentorMeeting = action.payload.meetingId;
-          },
           handleCallReceived: (state) => {
                state.callReceived = !state.callReceived;
           },
@@ -41,10 +39,13 @@ const MentorLayoutSlice = createSlice({
           },
           handleAcceptCall: (state, action) => {
                state.CallAccepted = true;
-               state.mentorToken = action.payload.token;
+               state.mentorMeeting = action.payload;
           },
           handleDeclineCall: (state) => {
                state.CallAccepted = false;
+          },
+          handleMeetingValidation: (state) => {
+               state.meetingIsValid = true;
           },
      },
 });
@@ -57,9 +58,9 @@ export const useMentorLayoutSlice = () =>
 export const MentorLayoutReducer = MentorLayoutSlice.reducer;
 export const {
      handleSideBar,
-     handleMentorMeetingId,
      handleCallReceived,
      handleAcceptCall,
      handleDeclineCall,
      handleCallData,
+     handleMeetingValidation,
 } = MentorLayoutSlice.actions;
