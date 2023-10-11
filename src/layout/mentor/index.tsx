@@ -5,7 +5,7 @@ import {
      handleAcceptCall,
      handleCallData,
      handleCallReceived,
-     handleDeclineCall,
+     handleMentorMeetingId,
      handleSideBar,
      handleToken,
      useMentorLayoutSlice,
@@ -69,8 +69,8 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
           }
           SocketIo.on("THROW_CALL_REQUEST", async (data: any) => {
                if (data.data.doctorId === mentorProfile?.data._id) {
-                    dispatch(handleAcceptCall(data.data.roomId));
-
+                    dispatch(handleAcceptCall(true));
+                    dispatch(handleMentorMeetingId(data.data.roomId as string));
                     dispatch(handleCallReceived());
                     dispatch(handleCallData(data.user as UserProps));
                }
@@ -78,7 +78,7 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
 
           if (!token) {
                (async () => {
-                    await GenerateToken("mentor");
+                    await GenerateToken();
                })();
           }
           if (isTokenError) {
@@ -114,7 +114,7 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
      };
 
      const RejectCall = () => {
-          dispatch(handleDeclineCall());
+          dispatch(handleAcceptCall(false));
      };
 
      return (
@@ -160,7 +160,7 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
                          </nav>
                     )}
                     <section className={clsx(!fullScreenMode && "p-5")}>
-                         {callReceived && CallAccepted && (
+                         {CallAccepted && (
                               <div className="p-5 border border-secondary-500 mb-3 rounded-lg animate-pulse bg-gradient-to-t from-secondary-100 to-gray-100 flex justify-between items-center">
                                    <div>
                                         <p className="font-mono">call notification</p>

@@ -101,7 +101,6 @@ export const UserVideoCallPage = () => {
                                                   meetingId={meetingId}
                                                   onMeetingLeave={onMeetingLeave}
                                                   userName={`${user?.data.name.firstName} ${user?.data.name.lastName}`}
-                                                  doctorName={`${doctor?.data.name.firstName} ${doctor?.data.name.lastName}`}
                                              />
                                         </div>
                                    </CallProvider>

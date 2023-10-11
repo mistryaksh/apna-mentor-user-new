@@ -24,7 +24,10 @@ export const BlogsPage = () => {
                </div>
                <div className="grid grid-cols-12 gap-10 container mx-auto py-20">
                     {blog?.data.slice(0, sliced + sliced).map(({ body, image, label, _id }) => (
-                         <div className="col-span-12 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-12">
+                         <div
+                              key={_id}
+                              className="col-span-12 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-12"
+                         >
                               <BlogCard _id={_id as string} key={_id} body={body} image={image} label={label} />
                          </div>
                     ))}

@@ -38,11 +38,10 @@ const MentorLayoutSlice = createSlice({
                };
           },
           handleAcceptCall: (state, action) => {
-               state.CallAccepted = true;
-               state.mentorMeeting = action.payload;
+               state.CallAccepted = action.payload;
           },
-          handleDeclineCall: (state) => {
-               state.CallAccepted = false;
+          handleMentorMeetingId: (state, action) => {
+               state.mentorMeeting = action.payload;
           },
           handleMeetingValidation: (state) => {
                state.meetingIsValid = true;
@@ -60,7 +59,7 @@ export const {
      handleSideBar,
      handleCallReceived,
      handleAcceptCall,
-     handleDeclineCall,
      handleCallData,
      handleMeetingValidation,
+     handleMentorMeetingId,
 } = MentorLayoutSlice.actions;

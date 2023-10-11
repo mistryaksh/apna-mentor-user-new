@@ -1,223 +1,100 @@
-import React, { FC, useEffect, useMemo, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import { MentorLayout } from "../../../../layout";
-import { MeetingProvider, useMeeting, useParticipant, usePubSub } from "@videosdk.live/react-sdk";
+import { useMeeting, usePubSub } from "@videosdk.live/react-sdk";
 import { useMentorProfileQuery, useValidateRoomMutation } from "../../../../app/apis";
-
-import ReactPlayer from "react-player";
-import { BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute } from "react-icons/bs";
-import { AiOutlineCopy, AiOutlineSend, AiOutlineToTop } from "react-icons/ai";
+import { AiOutlineSend, AiOutlineToTop } from "react-icons/ai";
 import clsx from "clsx";
 import moment from "moment";
 import { useNavigate, useParams } from "react-router-dom";
 import {
      handleAcceptCall,
-     handleDeclineCall,
+     handleJoined,
      handleMeetingId,
      handleMeetingValidation,
      useMentorLayoutSlice,
      useVideoChatSlice,
 } from "../../../../app/features";
 import { useAppDispatch } from "../../../../app/";
-import { SocketIo } from "../../../../service/video-call.api";
 import { toast } from "react-toastify";
-import { CallProvider } from "../../../../component";
+import { AppButton, CallProvider } from "../../../../component";
+import { UserParticipantView } from "../../../video-call";
 
-function MentorParticipantView({
-     participantId,
-     userName,
-     meetingId,
-}: {
-     participantId: string;
-     userName: string;
-     meetingId: string;
-}) {
-     const micRef = useRef<HTMLAudioElement>(null);
-
-     const { webcamStream, micStream, webcamOn, micOn, isLocal, displayName } = useParticipant(participantId);
-
-     const videoStream = useMemo(() => {
-          if (webcamOn && webcamStream) {
-               const mediaStream = new MediaStream();
-               mediaStream.addTrack(webcamStream.track);
-               return mediaStream;
-          }
-     }, [webcamStream, webcamOn]);
-
-     useEffect(() => {
-          if (micRef.current) {
-               if (micOn && micStream) {
-                    const mediaStream = new MediaStream();
-                    mediaStream.addTrack(micStream.track);
-
-                    micRef.current.srcObject = mediaStream;
-                    micRef.current.play().catch((error) => console.error("videoElem.current.play() failed", error));
-               } else {
-                    micRef.current.srcObject = null;
-               }
-          }
-     }, [micStream, micOn]);
-     const itsMe = displayName === userName;
-
-     return (
-          <div key={participantId} className="flex flex-col gap-5 justify-center items-start w-full">
-               <audio ref={micRef} autoPlay muted={isLocal} />
-               <div className={clsx("rounded-lg w-full flex items-center gap-3 relative z-10")}>
-                    {!itsMe && (
-                         <div className="absolute bottom-5 rounded-lg right-5 bg-secondary-500 shadow-lg z-20 p-3">
-                              <div className="flex gap-5">
-                                   <p className="text-white capitalize">{displayName}</p>
-                                   {webcamOn ? (
-                                        <BsCameraVideo size={24} className="fill-white" />
-                                   ) : (
-                                        <BsCameraVideoOff size={24} className="fill-white" />
-                                   )}
-                                   {micOn ? (
-                                        <BsMic size={24} className="fill-white" />
-                                   ) : (
-                                        <BsMicMute size={24} className="fill-white" />
-                                   )}
-                              </div>
-                         </div>
-                    )}
-                    {webcamOn && (
-                         <ReactPlayer
-                              //
-                              playsinline // very very imp prop
-                              pip={false}
-                              light={false}
-                              controls={false}
-                              muted={true}
-                              playing={true}
-                              //
-                              url={videoStream}
-                              //
-                              height={itsMe ? "40%" : "100%"}
-                              width={itsMe ? "40%" : "100%"}
-                              onError={(err) => {
-                                   console.log(err, "participant video error");
-                              }}
-                         />
-                    )}
-                    {!webcamOn && !itsMe && (
-                         <div
-                              className={clsx(
-                                   itsMe ? "30%" : "100%",
-                                   "py-10 px-5 border border-primary-300 rounded-lg"
-                              )}
-                         >
-                              <p className="text-gray-500 font-mono">User has turned off their camera</p>
-                         </div>
-                    )}
-                    {itsMe && (
-                         <div className="flex flex-col gap-3 flex-1 border border-primary-500 h-full p-5">
-                              <p className="text-2xl">You : {displayName}</p>
-                              <p className="text-gray-500 flex items-center gap-3">
-                                   Meeting ID : {meetingId}{" "}
-                                   <button>
-                                        <AiOutlineCopy size={22} />
-                                   </button>
-                              </p>
-                              {itsMe && (
-                                   <div className="flex gap-3 items-center">
-                                        {participantId && (
-                                             <Controls micOn={micOn} webcamOn={webcamOn} participate={participantId} />
-                                        )}
-                                   </div>
-                              )}
-                         </div>
-                    )}
-               </div>
-               {itsMe && (
-                    <div className="border p-3 flex justify-center items-center border-primary-500 w-full">
-                         <p className="font-mono capitalize text-sm text-gray-500">
-                              new features for video call app is comming soon!
-                         </p>
-                    </div>
-               )}
-          </div>
-     );
-}
-
-function MentorMeetingView({
-     onMeetingLeave,
-     meetingId,
-     userName,
-}: {
-     onMeetingLeave: () => void;
-     meetingId: string;
-     userName: string;
-}) {
+export const MentorMeetingView: FC<any> = ({ onMeetingLeave, meetingId, userName }: any) => {
      var topic = "CHAT";
+     const messagesEndRef = useRef(null) as any;
+     const [joined, setJoined] = useState("");
      const { end } = useMeeting();
-     const dispatch = useAppDispatch();
-     const { publish, messages } = usePubSub(topic);
-     const [joined, setJoined] = useState<string | null>(null);
 
+     const navigate = useNavigate();
+     const { publish, messages } = usePubSub(topic);
+     const dispatch = useAppDispatch();
      //Get the method which will be used to join the meeting.
      //We will also get the participants list to display all participants
-     const { join, participants } = useMeeting({
+     const { join, participants, meeting } = useMeeting({
           //callback for when meeting is joined successfully
           onMeetingJoined: () => {
-               setJoined("JOINED");
-               SocketIo.emit("ACCEPTED_CALL", meetingId);
+               dispatch(handleJoined("JOINED"));
           },
           //callback for when meeting is left
           onMeetingLeft: () => {
+               dispatch(handleMeetingId(null));
                onMeetingLeave();
+               navigate("/mentor/home", { replace: true });
           },
      });
-     const navigate = useNavigate();
 
-     useEffect(() => {
-          if (meetingId) {
-               join();
-          }
-     }, [meetingId]);
+     const joinMeeting = () => {
+          setJoined("JOINED");
+          dispatch(handleJoined("JOINED"));
+          join();
+     };
 
+     const [message, setMessage] = useState<string>("Hi");
      const SendMessage = () => {
           publish(message, { persist: true });
           setMessage("");
      };
-     const [message, setMessage] = useState<string>("");
-     const OnMeetingEnd = () => {
-          end();
-          dispatch(handleDeclineCall());
-          SocketIo.emit("END_MEETING", meetingId);
-          navigate("/mentor/my-calls", { replace: true });
+     const scrollToBottom = () => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
      };
+
+     useEffect(() => {
+          meeting?.on("connection-open", () => {
+               toast.success("meeting initiated");
+          });
+          scrollToBottom();
+     }, [meeting, messagesEndRef]);
+
      return (
-          <div className="w-screen h-screen p-3">
-               {joined === "JOINED" ? (
-                    <div className="flex h-full w-full justify-between">
-                         <div className="flex-1 p-3">
-                              {/* For rendering all the participants in the meeting */}
-                              <div className="flex flex-col-reverse gap-5 h-full w-full">
-                                   {[...(participants.keys() as any)].map((participantId) => (
-                                        <div key={participantId}>
-                                             <MentorParticipantView
-                                                  meetingId={meetingId}
-                                                  userName={userName}
-                                                  participantId={participantId}
-                                                  key={participantId}
-                                             />
-                                        </div>
-                                   ))}
-                              </div>
+          <div className="h-full w-full">
+               {joined && joined === "JOINED" ? (
+                    <div className="p-5 flex gap-5 items-start justify-end h-full">
+                         {/* For rendering all the participants in the meeting */}
+                         <div className="flex-1 flex flex-col-reverse gap-5  justify-end bg-gray-100 rounded-lg h-[100%]">
+                              {[...(participants.keys() as any)].map((participantId) => (
+                                   <div key={participantId}>
+                                        <UserParticipantView
+                                             meetingId={meetingId}
+                                             userName={userName}
+                                             participantId={participantId}
+                                             key={participantId}
+                                        />
+                                   </div>
+                              ))}
                          </div>
-                         <div className="flex-1">
+                         <div className="flex-1 h-full">
                               <div className="flex flex-col justify-between h-full bg-gray-100 rounded-lg">
                                    <div className="bg-gray-900 z-20 py-5 px-4 rounded-lg flex justify-between items-center shadow-lg">
-                                        <p className="text-white uppercase">User name {userName}</p>
                                         <button
                                              className="bg-gray-400 px-3 py-1 hover:bg-gray-600 rounded-lg"
-                                             onClick={OnMeetingEnd}
+                                             onClick={() => end()}
                                         >
-                                             <span className="text-white">End meeting</span>
+                                             <span className="text-white">Leave</span>
                                         </button>
                                    </div>
-                                   <div className={clsx("h-[70%] overflow-scroll scroll-smooth")}>
+                                   <div className={clsx("h-[70%] overflow-scroll scroll-smooth")} ref={messagesEndRef}>
                                         {messages.length !== 0 && (
-                                             <div className="flex flex-col gap-5 z-10 px-3">
+                                             <div className="flex flex-col gap-5 z-10 pb-2 px-3">
                                                   {messages.map(({ message, senderName, id, timestamp }) => {
                                                        const myMsg: boolean = senderName === userName;
                                                        return (
@@ -232,7 +109,7 @@ function MentorMeetingView({
                                                                       className={clsx(
                                                                            "w-[70%] p-2 rounded-lg flex flex-col border ",
                                                                            myMsg
-                                                                                ? "bg-secondary-100 text-secondary-500 text-right border-secondary-500"
+                                                                                ? "bg-primary-100 text-primary-500 text-right border-primary-500"
                                                                                 : "bg-gray-100 border-secondary-500 text-gray-900 text-left"
                                                                       )}
                                                                  >
@@ -240,8 +117,8 @@ function MentorMeetingView({
                                                                            className={clsx(
                                                                                 "text-xs capitalize",
                                                                                 myMsg
-                                                                                     ? "text-secondary-500"
-                                                                                     : "text-primary-500"
+                                                                                     ? "text-primary-500"
+                                                                                     : "text-secondary-500"
                                                                            )}
                                                                       >
                                                                            {senderName}
@@ -263,6 +140,13 @@ function MentorMeetingView({
                                                   })}
                                              </div>
                                         )}
+                                        {messages.length === 0 && (
+                                             <div className="text-center my-20">
+                                                  <p className="text-gray-500 capitalize font-mono">
+                                                       Start sending messages to the mentor
+                                                  </p>
+                                             </div>
+                                        )}
                                    </div>
                                    <div className="flex gap-3 items-center p-3">
                                         <input
@@ -282,37 +166,20 @@ function MentorMeetingView({
                               </div>
                          </div>
                     </div>
+               ) : joined && joined === "JOINING" ? (
+                    <p>Joining the meeting...</p>
                ) : (
-                    joined === "JOINING" && <p>Joining the meeting...</p>
+                    <div className="p-3 flex flex-col justify-center items-center h-full mx-auto w-screen">
+                         <p className="text-xl font-mono">
+                              Your meeting has been initialized please click to join meeting
+                         </p>
+                         <div className="mt-5">
+                              <AppButton primary onClick={joinMeeting}>
+                                   Start meeting
+                              </AppButton>
+                         </div>
+                    </div>
                )}
-          </div>
-     );
-}
-
-interface ControlProps {
-     micOn: boolean;
-     webcamOn: boolean;
-     participate: string;
-}
-
-const Controls: FC<ControlProps> = ({ webcamOn, micOn }) => {
-     const { toggleMic, toggleWebcam } = useMeeting();
-     return (
-          <div className="flex gap-5 items-center">
-               <button onClick={() => toggleMic()} className="bg-gray-300 p-3 rounded-lg">
-                    {micOn ? (
-                         <BsMic size={24} className="fill-primary-500" />
-                    ) : (
-                         <BsMicMute size={24} className="fill-gray-900" />
-                    )}
-               </button>
-               <button onClick={() => toggleWebcam()} className="bg-gray-300 p-3 rounded-lg">
-                    {webcamOn ? (
-                         <BsCameraVideo size={24} className="fill-primary-500 " />
-                    ) : (
-                         <BsCameraVideoOff size={24} className="fill-gray-900" />
-                    )}
-               </button>
           </div>
      );
 };
@@ -332,16 +199,9 @@ export const MentorJoinPage = () => {
      ] = useValidateRoomMutation();
 
      useEffect(() => {
-          dispatch(handleDeclineCall());
-          if (meetingId && token && !meetingIsValid) {
-               (async () => {
-                    await ValidateMeetingIdAndToken({ meetingId, token });
-               })();
-          }
-          if (isValidateSuccess) {
-               if (validateData?.data?.roomId) {
-                    dispatch(handleMeetingValidation());
-               }
+          dispatch(handleAcceptCall(false));
+          if (meetingId) {
+               dispatch(handleMeetingValidation());
           }
 
           if (isValidateError) {
@@ -351,6 +211,7 @@ export const MentorJoinPage = () => {
                     toast.error((validateError as any).message);
                }
           }
+          dispatch(handleAcceptCall(false));
      }, [
           meetingId,
           dispatch,
@@ -362,6 +223,7 @@ export const MentorJoinPage = () => {
           meetingIsValid,
           validateData,
      ]);
+
      //This will set Meeting Id to null when meeting is left or ended
      const onMeetingLeave = () => {
           dispatch(handleMeetingId(null));

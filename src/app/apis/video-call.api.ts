@@ -6,14 +6,11 @@ const videoCallApi = createApi({
           baseUrl: process.env.REACT_APP_URL,
      }),
      endpoints: ({ mutation }) => ({
-          GenerateToken: mutation({
-               query: (role: string) => {
+          GenerateToken: mutation<any, void>({
+               query: () => {
                     return {
                          url: "/generate-token",
                          method: "POST",
-                         body: {
-                              role: role,
-                         },
                     };
                },
           }),

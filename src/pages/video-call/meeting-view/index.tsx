@@ -15,16 +15,9 @@ export interface UserMeetingViewProps {
      meetingId: string;
      joined: string | null;
      userName: string;
-     doctorName: string;
 }
 
-export const UserMeetingView: FC<UserMeetingViewProps> = ({
-     onMeetingLeave,
-     meetingId,
-     joined,
-     doctorName,
-     userName,
-}) => {
+export const UserMeetingView: FC<UserMeetingViewProps> = ({ onMeetingLeave, meetingId, joined, userName }) => {
      var topic = "CHAT";
      const messagesEndRef = useRef(null) as any;
      const { leave } = useMeeting();
@@ -88,7 +81,6 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({
                          <div className="flex-1 h-full">
                               <div className="flex flex-col justify-between h-full bg-gray-100 rounded-lg">
                                    <div className="bg-gray-900 z-20 py-5 px-4 rounded-lg flex justify-between items-center shadow-lg">
-                                        <p className="text-white uppercase">Mentor {doctorName}</p>
                                         <button
                                              className="bg-gray-400 px-3 py-1 hover:bg-gray-600 rounded-lg"
                                              onClick={() => leave()}

@@ -98,7 +98,7 @@ export const MainLayout: FC<MainLayoutProps> = ({ children, loading, mode }) => 
           }
           if (!token) {
                (async () => {
-                    await GenerateToken("user");
+                    await GenerateToken();
                })();
           }
           if (isTokenError) {
