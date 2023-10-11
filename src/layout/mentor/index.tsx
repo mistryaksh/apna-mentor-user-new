@@ -110,6 +110,7 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
      ]);
 
      const AcceptCall = () => {
+          SocketIo.emit("ACCEPTED_CALL", mentorMeeting);
           navigate(`/mentor/join-mentor-meeting/${mentorMeeting}`);
      };
 

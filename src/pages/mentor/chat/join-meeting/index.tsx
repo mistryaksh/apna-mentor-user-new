@@ -11,6 +11,7 @@ import {
      handleJoined,
      handleMeetingId,
      handleMeetingValidation,
+     handleMessages,
      useMentorLayoutSlice,
      useVideoChatSlice,
 } from "../../../../app/features";
@@ -18,15 +19,56 @@ import { useAppDispatch } from "../../../../app/";
 import { toast } from "react-toastify";
 import { AppButton, CallProvider } from "../../../../component";
 import { UserParticipantView } from "../../../video-call";
+import { SocketIo } from "../../../../service/video-call.api";
 
-export const MentorMeetingView: FC<any> = ({ onMeetingLeave, meetingId, userName }: any) => {
+export const MentorMeetingView: FC<any> = ({
+     onMeetingLeave,
+     meetingId,
+     userName,
+}: {
+     onMeetingLeave: () => void;
+     meetingId: string;
+     userName: string;
+}) => {
      var topic = "CHAT";
+     const { chatMessages } = useVideoChatSlice();
      const messagesEndRef = useRef(null) as any;
      const [joined, setJoined] = useState("");
      const { end } = useMeeting();
 
      const navigate = useNavigate();
-     const { publish, messages } = usePubSub(topic);
+     const { publish, messages } = usePubSub(topic, {
+          onMessageReceived,
+     });
+     function onMessageReceived({
+          message,
+          id,
+          senderId,
+          senderName,
+          timestamp,
+          topic,
+     }: {
+          id: string;
+          message: string;
+          senderId: string;
+          senderName: string;
+          timestamp: string;
+          topic: string;
+     }) {
+          dispatch(handleMessages({ message: { message, id, senderId, senderName, timestamp, topic } }));
+          SocketIo.emit("SEND_MESSAGE", {
+               roomId: meetingId,
+               message: {
+                    message,
+                    id,
+                    senderId,
+                    senderName,
+                    timestamp,
+                    topic,
+               },
+          });
+     }
+
      const dispatch = useAppDispatch();
      //Get the method which will be used to join the meeting.
      //We will also get the participants list to display all participants
@@ -87,59 +129,62 @@ export const MentorMeetingView: FC<any> = ({ onMeetingLeave, meetingId, userName
                                    <div className="bg-gray-900 z-20 py-5 px-4 rounded-lg flex justify-between items-center shadow-lg">
                                         <button
                                              className="bg-gray-400 px-3 py-1 hover:bg-gray-600 rounded-lg"
-                                             onClick={() => end()}
+                                             onClick={() => {
+                                                  SocketIo.emit("END_MEETING", meetingId);
+                                                  end();
+                                             }}
                                         >
                                              <span className="text-white">Leave</span>
                                         </button>
                                    </div>
                                    <div className={clsx("h-[70%] overflow-scroll scroll-smooth")} ref={messagesEndRef}>
-                                        {messages.length !== 0 && (
-                                             <div className="flex flex-col gap-5 z-10 pb-2 px-3">
-                                                  {messages.map(({ message, senderName, id, timestamp }) => {
-                                                       const myMsg: boolean = senderName === userName;
-                                                       return (
+                                        {/* {chatMessages?.length && ( */}
+                                        <div className="flex flex-col gap-5 z-10 pb-2 px-3">
+                                             {chatMessages?.map(({ message, senderName, id, timestamp }) => {
+                                                  const myMsg: boolean = senderName === userName;
+                                                  return (
+                                                       <div
+                                                            key={id}
+                                                            className={clsx(
+                                                                 "w-full flex gap-3 items-center",
+                                                                 !myMsg ? "justify-start" : "justify-end"
+                                                            )}
+                                                       >
                                                             <div
-                                                                 key={id}
                                                                  className={clsx(
-                                                                      "w-full flex gap-3 items-center",
-                                                                      !myMsg ? "justify-start" : "justify-end"
+                                                                      "w-[70%] p-2 rounded-lg flex flex-col border ",
+                                                                      myMsg
+                                                                           ? "bg-primary-100 text-primary-500 text-right border-primary-500"
+                                                                           : "bg-gray-100 border-secondary-500 text-gray-900 text-left"
                                                                  )}
                                                             >
-                                                                 <div
+                                                                 <p
                                                                       className={clsx(
-                                                                           "w-[70%] p-2 rounded-lg flex flex-col border ",
+                                                                           "text-xs capitalize",
                                                                            myMsg
-                                                                                ? "bg-primary-100 text-primary-500 text-right border-primary-500"
-                                                                                : "bg-gray-100 border-secondary-500 text-gray-900 text-left"
+                                                                                ? "text-primary-500"
+                                                                                : "text-secondary-500"
                                                                       )}
                                                                  >
-                                                                      <p
-                                                                           className={clsx(
-                                                                                "text-xs capitalize",
-                                                                                myMsg
-                                                                                     ? "text-primary-500"
-                                                                                     : "text-secondary-500"
-                                                                           )}
-                                                                      >
-                                                                           {senderName}
-                                                                      </p>
-                                                                      <p className="text-md text-gray-900">{message}</p>
-                                                                      {myMsg && (
-                                                                           <div className="text-xs text-gray-400 uppercase text-left mt-2">
-                                                                                {moment(timestamp).format("hh:mm a")}
-                                                                           </div>
-                                                                      )}
-                                                                      {!myMsg && (
-                                                                           <div className="text-xs text-gray-100 uppercase text-right mt-2">
-                                                                                {moment(timestamp).format("hh:mm a")}
-                                                                           </div>
-                                                                      )}
-                                                                 </div>
+                                                                      {senderName}
+                                                                 </p>
+                                                                 <p className="text-md text-gray-900">{message}</p>
+                                                                 {myMsg && (
+                                                                      <div className="text-xs text-gray-400 uppercase text-left mt-2">
+                                                                           {moment(timestamp).format("hh:mm a")}
+                                                                      </div>
+                                                                 )}
+                                                                 {!myMsg && (
+                                                                      <div className="text-xs text-gray-100 uppercase text-right mt-2">
+                                                                           {moment(timestamp).format("hh:mm a")}
+                                                                      </div>
+                                                                 )}
                                                             </div>
-                                                       );
-                                                  })}
-                                             </div>
-                                        )}
+                                                       </div>
+                                                  );
+                                             })}
+                                        </div>
+                                        {/* )} */}
                                         {messages.length === 0 && (
                                              <div className="text-center my-20">
                                                   <p className="text-gray-500 capitalize font-mono">
@@ -199,8 +244,8 @@ export const MentorJoinPage = () => {
      ] = useValidateRoomMutation();
 
      useEffect(() => {
-          dispatch(handleAcceptCall(false));
           if (meetingId) {
+               dispatch(handleAcceptCall(false));
                dispatch(handleMeetingValidation());
           }
 
@@ -211,7 +256,6 @@ export const MentorJoinPage = () => {
                     toast.error((validateError as any).message);
                }
           }
-          dispatch(handleAcceptCall(false));
      }, [
           meetingId,
           dispatch,
@@ -225,7 +269,7 @@ export const MentorJoinPage = () => {
      ]);
 
      //This will set Meeting Id to null when meeting is left or ended
-     const onMeetingLeave = () => {
+     const onMeetingLeave = (messages: any[]) => {
           dispatch(handleMeetingId(null));
      };
      return (
@@ -240,12 +284,15 @@ export const MentorJoinPage = () => {
                                         mic
                                         webcam
                                         username={`${mentor?.data.name.firstName} ${mentor?.data.name.lastName}`}
+                                        userId={mentor?.data._id as string}
                                    >
-                                        <MentorMeetingView
-                                             userName={userName}
-                                             meetingId={meetingId as string}
-                                             onMeetingLeave={onMeetingLeave}
-                                        />
+                                        <div className="h-full w-full">
+                                             <MentorMeetingView
+                                                  userName={userName}
+                                                  meetingId={meetingId as string}
+                                                  onMeetingLeave={onMeetingLeave}
+                                             />
+                                        </div>
                                    </CallProvider>
                               </div>
                          ) : (

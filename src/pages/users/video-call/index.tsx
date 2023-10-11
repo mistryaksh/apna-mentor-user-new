@@ -1,7 +1,12 @@
 import React, { useEffect } from "react";
 import { MainLayout } from "../../../layout";
 import { useNavigate, useParams } from "react-router-dom";
-import { useCreateMeetingMutation, useGetDoctorByIdMutation, useProfileAccountQuery } from "../../../app/apis";
+import {
+     useCreateMeetingMutation,
+     useGetDoctorByIdMutation,
+     useProfileAccountQuery,
+     useSaveChatMutation,
+} from "../../../app/apis";
 import { toast } from "react-toastify";
 import { handleMeetingId, handleMice, handleVideoCam, useVideoChatSlice } from "../../../app/features";
 import { useAppDispatch } from "../../../app/";
@@ -21,6 +26,16 @@ export const UserVideoCallPage = () => {
           CreateMeeting,
           { data: meetingData, isError: isMeetingError, error: meetingError, isSuccess: isMeetingSuccess },
      ] = useCreateMeetingMutation();
+     const [
+          SavingChat,
+          {
+               data,
+               isError: isSaveChatError,
+               isLoading: isSaveChatLoading,
+               isSuccess: isSaveChatSuccess,
+               error: saveChatError,
+          },
+     ] = useSaveChatMutation();
 
      useEffect(() => {
           if (doctorId) {
@@ -51,8 +66,16 @@ export const UserVideoCallPage = () => {
                     roomId: meetingData?.data?.roomId,
                     userId: user?.data._id,
                });
+
                if (meetingData) {
                     dispatch(handleMeetingId(meetingData?.data?.roomId));
+                    (async () => {
+                         await SavingChat({
+                              doctorId: doctorId as string,
+                              roomId: meetingData?.data?.roomId,
+                              userId: user?.data._id as string,
+                         });
+                    })();
                }
           }
      }, [
@@ -65,9 +88,8 @@ export const UserVideoCallPage = () => {
           meetingError,
           isMeetingSuccess,
           meetingData,
-          meetingId,
           user,
-          token,
+          SavingChat,
      ]);
 
      const StartJoinMeeting = async () => {
@@ -89,6 +111,7 @@ export const UserVideoCallPage = () => {
                          {token && meetingId ? (
                               <div className="w-full h-full">
                                    <CallProvider
+                                        userId={user?.data._id as string}
                                         meetingId={meetingId}
                                         token={token}
                                         mic={mic}

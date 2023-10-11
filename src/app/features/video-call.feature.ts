@@ -9,6 +9,7 @@ export interface videoInitialStateProps {
      userName: string | null;
      joined?: string | null;
      token: string | null;
+     chatMessages: any[];
 }
 
 const initialState: videoInitialStateProps = {
@@ -17,6 +18,7 @@ const initialState: videoInitialStateProps = {
      meetingId: null,
      userName: null,
      token: null,
+     chatMessages: [],
 };
 
 const VideoChat = createSlice({
@@ -42,6 +44,9 @@ const VideoChat = createSlice({
                     state.token = null;
                }
           },
+          handleMessages: (state, action) => {
+               state.chatMessages?.push(action.payload.message);
+          },
      },
 });
 
@@ -51,4 +56,5 @@ export const useVideoChatSlice = () =>
      });
 
 export const VideoChatReducer = VideoChat.reducer;
-export const { handleMice, handleVideoCam, handleMeetingId, handleJoined, handleToken } = VideoChat.actions;
+export const { handleMice, handleVideoCam, handleMeetingId, handleJoined, handleToken, handleMessages } =
+     VideoChat.actions;

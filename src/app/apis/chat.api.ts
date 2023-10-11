@@ -8,7 +8,6 @@ const chatApi = createApi({
      endpoints: ({ query, mutation }) => ({
           CreateMeeting: mutation({
                query: (token) => {
-                    console.log(token);
                     return {
                          url: "/create-meeting",
                          method: "POST",

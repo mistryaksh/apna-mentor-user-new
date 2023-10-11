@@ -81,10 +81,10 @@ export const Homepage = () => {
                                    user={data?.data._id as string}
                                    key={_id}
                                    comments={doctorId?.comments?.length as number}
-                                   hospital={doctorId.workDetails.hospital}
-                                   name={doctorId.name}
+                                   hospital={doctorId?.workDetails?.hospital}
+                                   name={doctorId?.name}
                                    id={_id as string}
-                                   specialization={doctorId.workDetails.hospital.specialization}
+                                   specialization={doctorId?.workDetails?.hospital?.specialization}
                               />
                          ))}
                     </div>
@@ -144,7 +144,7 @@ export const Homepage = () => {
                          </div>
                          <div className="my-10">
                               <div className="grid grid-cols-12 gap-5">
-                                   {faqs.map(({ label, desc }, i) => (
+                                   {faqs?.map(({ label, desc }, i) => (
                                         <div
                                              className="col-span-12 xl:col-span-6 lg:col-span-6 md:col-span-6 sm:col-span-12"
                                              key={i}

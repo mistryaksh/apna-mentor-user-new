@@ -14,10 +14,19 @@ const videoCallApi = createApi({
                     };
                },
           }),
+          SaveChat: mutation({
+               query: ({ doctorId, roomId, userId }: { userId: string; doctorId: string; roomId: string }) => {
+                    return {
+                         url: "/save-chat",
+                         method: "POST",
+                         body: { doctorId, roomId, userId },
+                    };
+               },
+          }),
      }),
 });
 
-export const { useGenerateTokenMutation } = videoCallApi;
+export const { useGenerateTokenMutation, useSaveChatMutation } = videoCallApi;
 
 export const VideoCallApiReducer = videoCallApi.reducer;
 export const VideoCallApiMiddleware = videoCallApi.middleware;

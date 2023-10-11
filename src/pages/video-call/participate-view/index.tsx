@@ -5,6 +5,7 @@ import { AiOutlineCopy } from "react-icons/ai";
 import { BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute } from "react-icons/bs";
 import ReactPlayer from "react-player";
 import { Controls } from "../controls";
+import { toast } from "react-toastify";
 
 export const UserParticipantView = ({
      participantId,
@@ -81,6 +82,7 @@ export const UserParticipantView = ({
                               width={itsMe ? "40%" : "100%"}
                               onError={(err) => {
                                    console.log(err, "participant video error");
+                                   toast("Your hardware caused error please check your browser configs");
                               }}
                          />
                     )}

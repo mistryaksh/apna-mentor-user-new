@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { MentorLayout } from "../../../../layout";
-import { useVideoChatSlice } from "../../../../app/features";
 import DataTable from "react-data-table-component";
 import { AiOutlineCopy, AiOutlineVideoCamera } from "react-icons/ai";
 import { toast } from "react-toastify";
@@ -81,6 +80,14 @@ export const MentorMyCallsPage = () => {
                                         width: "200px",
                                         selector: (row: any) => moment(row.createdAt).format("MMM Do YYYY h:mm:ss A"),
                                    },
+                                   {
+                                        center: true,
+                                        id: "UpdatedAt",
+                                        name: "Completed On",
+                                        width: "200px",
+                                        selector: (row: any) => moment(row.updatedAt).format("MMM Do YYYY h:mm:ss A"),
+                                   },
+
                                    {
                                         id: "roomId",
                                         name: "meeting ID",

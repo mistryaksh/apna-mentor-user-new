@@ -61,6 +61,11 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({ onMeetingLeave, meet
           scrollToBottom();
      }, [meeting, messagesEndRef]);
 
+     const MeetingLeave = () => {
+          leave();
+          dispatch(handleJoined(""));
+     };
+
      return (
           <div className="h-full w-full">
                {joined && joined === "JOINED" ? (
@@ -83,7 +88,7 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({ onMeetingLeave, meet
                                    <div className="bg-gray-900 z-20 py-5 px-4 rounded-lg flex justify-between items-center shadow-lg">
                                         <button
                                              className="bg-gray-400 px-3 py-1 hover:bg-gray-600 rounded-lg"
-                                             onClick={() => leave()}
+                                             onClick={MeetingLeave}
                                         >
                                              <span className="text-white">Leave</span>
                                         </button>
@@ -165,7 +170,7 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({ onMeetingLeave, meet
                ) : joined && joined === "JOINING" ? (
                     <p>Joining the meeting...</p>
                ) : (
-                    <div className="p-3 flex flex-col justify-center items-center h-[60%]">
+                    <div className="p-3 flex flex-col justify-center items-center h-full w-full">
                          <p className="text-xl font-mono">
                               Your meeting has been initialized please click to join meeting
                          </p>

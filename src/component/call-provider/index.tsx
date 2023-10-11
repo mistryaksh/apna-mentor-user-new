@@ -8,9 +8,10 @@ export interface CallProviderProps {
      webcam: boolean;
      children: ReactNode;
      username: string;
+     userId: string;
 }
 
-export const CallProvider: FC<CallProviderProps> = ({ meetingId, mic, token, webcam, children, username }) => {
+export const CallProvider: FC<CallProviderProps> = ({ meetingId, mic, token, webcam, children, username, userId }) => {
      return (
           <MeetingProvider
                token={token}
@@ -20,6 +21,7 @@ export const CallProvider: FC<CallProviderProps> = ({ meetingId, mic, token, web
                     name: username,
                     webcamEnabled: webcam,
                     mode: "CONFERENCE",
+                    participantId: userId,
                }}
           >
                {children}
