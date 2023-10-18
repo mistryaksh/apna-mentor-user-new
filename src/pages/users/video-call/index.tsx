@@ -1,14 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { MainLayout } from "../../../layout";
 import { useNavigate, useParams } from "react-router-dom";
 import {
      useCreateMeetingMutation,
+     useGenerateTokenMutation,
      useGetDoctorByIdMutation,
      useProfileAccountQuery,
      useSaveChatMutation,
 } from "../../../app/apis";
 import { toast } from "react-toastify";
-import { handleMeetingId, handleMice, handleVideoCam, useVideoChatSlice } from "../../../app/features";
+import {
+     handleJoined,
+     handleMeetingId,
+     handleMice,
+     handleToken,
+     handleVideoCam,
+     useVideoChatSlice,
+} from "../../../app/features";
 import { useAppDispatch } from "../../../app/";
 import { BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute } from "react-icons/bs";
 import { AppButton, CallProvider } from "../../../component";
@@ -26,16 +34,10 @@ export const UserVideoCallPage = () => {
           CreateMeeting,
           { data: meetingData, isError: isMeetingError, error: meetingError, isSuccess: isMeetingSuccess },
      ] = useCreateMeetingMutation();
-     const [
-          SavingChat,
-          {
-               data,
-               isError: isSaveChatError,
-               isLoading: isSaveChatLoading,
-               isSuccess: isSaveChatSuccess,
-               error: saveChatError,
-          },
-     ] = useSaveChatMutation();
+     const [SavingChat] = useSaveChatMutation();
+     const [GetToken, { data: tokenData, isError: isTokenError, isSuccess: isTokenSuccess, error: tokenError }] =
+          useGenerateTokenMutation();
+     const tokenRef = useRef(token);
 
      useEffect(() => {
           if (doctorId) {
@@ -78,6 +80,28 @@ export const UserVideoCallPage = () => {
                     })();
                }
           }
+
+          SocketIo.on("REJECTED", (data) => {
+               toast.error(data.message);
+               navigate("/doctors/all", { replace: true });
+          });
+
+          if (token === null) {
+               (async () => {
+                    await GetToken();
+               })();
+          }
+
+          if (isTokenError) {
+               if ((tokenError as any).data) {
+                    toast.error((tokenError as any).data.message);
+               } else {
+                    toast.error((tokenError as any).message);
+               }
+          }
+          if (isTokenSuccess) {
+               dispatch(handleToken(tokenData?.data));
+          }
      }, [
           Profile,
           dispatch,
@@ -90,6 +114,14 @@ export const UserVideoCallPage = () => {
           meetingData,
           user,
           SavingChat,
+          isTokenError,
+          tokenError,
+          isTokenSuccess,
+          tokenData,
+          token,
+          GetToken,
+          tokenRef,
+          navigate,
      ]);
 
      const StartJoinMeeting = async () => {
@@ -102,6 +134,7 @@ export const UserVideoCallPage = () => {
 
      const onMeetingLeave = () => {
           dispatch(handleMeetingId(null));
+          dispatch(handleJoined(""));
      };
 
      return (

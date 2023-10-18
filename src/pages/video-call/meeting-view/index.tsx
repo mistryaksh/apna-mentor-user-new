@@ -66,6 +66,17 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({ onMeetingLeave, meet
           dispatch(handleJoined(""));
      };
 
+     // Call timer
+     const [timer, setTime] = useState<any>();
+     useEffect(() => {
+          var startTimestamp = moment().startOf("day");
+
+          setInterval(function () {
+               startTimestamp.add(1, "second");
+               setTime(startTimestamp.format("HH:mm:ss"));
+          }, 1000);
+     }, []);
+
      return (
           <div className="h-full w-full">
                {joined && joined === "JOINED" ? (
@@ -92,6 +103,7 @@ export const UserMeetingView: FC<UserMeetingViewProps> = ({ onMeetingLeave, meet
                                         >
                                              <span className="text-white">Leave</span>
                                         </button>
+                                        <p className="text-white">{timer}</p>
                                    </div>
                                    <div className={clsx("h-[70%] overflow-scroll scroll-smooth")} ref={messagesEndRef}>
                                         {messages.length !== 0 && (

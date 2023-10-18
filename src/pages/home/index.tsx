@@ -78,9 +78,7 @@ export const Homepage = () => {
                     <div className="grid grid-cols-12 gap-5 w-full py-10">
                          {topDoctors?.data.map(({ doctorId, _id }) => (
                               <DoctorCard
-                                   user={data?.data._id as string}
                                    key={_id}
-                                   comments={doctorId?.comments?.length as number}
                                    hospital={doctorId?.workDetails?.hospital}
                                    name={doctorId?.name}
                                    id={_id as string}

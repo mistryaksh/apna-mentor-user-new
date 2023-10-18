@@ -85,6 +85,17 @@ export const MentorMeetingView: FC<any> = ({
           },
      });
 
+     // Call timer
+     const [timer, setTime] = useState<any>();
+     useEffect(() => {
+          var startTimestamp = moment().startOf("day");
+
+          setInterval(function () {
+               startTimestamp.add(1, "second");
+               setTime(startTimestamp.format("HH:mm:ss"));
+          }, 1000);
+     }, []);
+
      const joinMeeting = () => {
           setJoined("JOINED");
           dispatch(handleJoined("JOINED"));
@@ -132,10 +143,12 @@ export const MentorMeetingView: FC<any> = ({
                                              onClick={() => {
                                                   SocketIo.emit("END_MEETING", meetingId);
                                                   end();
+                                                  setJoined("");
                                              }}
                                         >
                                              <span className="text-white">Leave</span>
                                         </button>
+                                        <p className="text-white">{timer}</p>
                                    </div>
                                    <div className={clsx("h-[70%] overflow-scroll scroll-smooth")} ref={messagesEndRef}>
                                         {/* {chatMessages?.length && ( */}
@@ -272,6 +285,7 @@ export const MentorJoinPage = () => {
      const onMeetingLeave = (messages: any[]) => {
           dispatch(handleMeetingId(null));
      };
+
      return (
           <MentorLayout fullScreenMode>
                <div className="flex border h-screen w-screen">

@@ -18,6 +18,7 @@ import {
      UserVideoCallPage,
      MentorMyCallsPage,
      MentorJoinPage,
+     DoctorProfilePage,
 } from "./";
 import { useAccountSlice } from "../app/features";
 
@@ -36,6 +37,7 @@ export const AppRoutes = () => {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify/mobile/:mobile" element={<VerifyMobilePage />} />
                     <Route path="/doctors/all" element={<AllDoctorPage />} />
+                    <Route path="/doctor/:doctorId" element={<DoctorProfilePage />} />
                </>
                {user?.loggedIn && (
                     <Route>

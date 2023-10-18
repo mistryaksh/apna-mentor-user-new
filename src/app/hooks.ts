@@ -16,6 +16,7 @@ import {
      DoctorApiReducer,
      MentorApiReducer,
      MentorCallReducer,
+     MentorCommentReducer,
      TopDoctorApiReducer,
      VideoCallApiReducer,
 } from "./apis";
@@ -46,6 +47,7 @@ const rootStorage = combineReducers({
      mentorApi: MentorApiReducer,
      videoCallApi: VideoCallApiReducer,
      mentorCallApi: MentorCallReducer,
+     mentorCommentApi: MentorCommentReducer,
 });
 
 export const persistConfig = {

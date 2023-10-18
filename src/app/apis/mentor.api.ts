@@ -29,7 +29,7 @@ const mentorApi = createApi({
           MentorProfile: query<{ data: IMentorProps }, void>({
                query: () => "/profile/get-doctor-profile",
           }),
-          GetMyCalls: query({
+          GetMyCalls: query<{ data: IChatProps[] }, string>({
                query: (id: string) => {
                     return {
                          url: `/mentor/get-my-calls/${id}`,

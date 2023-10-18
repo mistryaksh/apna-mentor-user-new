@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const chatApi = createApi({
      reducerPath: "chatApi",
      baseQuery: fetchBaseQuery({
-          baseUrl: "https://truthful-amber-slip.glitch.me/api/1.0",
+          baseUrl: "http://35.171.78.89:8080/api/1.0",
      }),
      endpoints: ({ query, mutation }) => ({
           CreateMeeting: mutation({

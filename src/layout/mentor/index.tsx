@@ -115,6 +115,7 @@ export const MentorLayout: FC<MentorLayoutProps> = ({ children, fullScreenMode }
      };
 
      const RejectCall = () => {
+          SocketIo.emit("REJECT_MEETING", mentorMeeting);
           dispatch(handleAcceptCall(false));
      };
 

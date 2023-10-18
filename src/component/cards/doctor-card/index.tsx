@@ -11,11 +11,9 @@ export interface DoctorCardProps {
      specialization: string[];
      id: string;
      hospital: any;
-     comments: number;
-     user: string;
 }
 
-export const DoctorCard: FC<DoctorCardProps> = ({ name, specialization, comments, hospital, id, user }) => {
+export const DoctorCard: FC<DoctorCardProps> = ({ name, specialization, hospital, id }) => {
      const navigate = useNavigate();
      return (
           <div
@@ -36,11 +34,9 @@ export const DoctorCard: FC<DoctorCardProps> = ({ name, specialization, comments
                     MENTOR {name.firstName} {name.lastName}
                </h6>
                <p className="capitalize text-sm">{hospital.name}</p>
-               <p className="text-right">
-                    <span className="text-gray-500">{comments}</span> Comments
-               </p>
+
                <div className="flex justify-between items-center gap-5">
-                    <AppButton onClick={() => navigate("/doctors")} primary>
+                    <AppButton onClick={() => navigate(`/doctor/${id}`)} primary>
                          View Profile
                     </AppButton>
                     <div>

@@ -5,3 +5,4 @@ export * from "./chat.api";
 export * from "./mentor.api";
 export * from "./video-call.api";
 export * from "./mentor-calls.api";
+export * from "./mentor-comments.api";

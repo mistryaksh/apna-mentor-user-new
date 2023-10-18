@@ -5,13 +5,13 @@ import {
      DoctorApiMiddleware,
      MentorApiMiddleware,
      MentorCallMiddleware,
+     MentorCommentMiddleware,
      TopDoctorApiMiddleware,
      VideoCallApiMiddleware,
 } from "./apis";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 import { persistedReducer } from "./hooks";
 import { BlogApiMiddleware } from "./apis/blogs.api";
-import thunk from "redux-thunk";
 
 export const StoreMiddlewaresArray: Middleware[] = [
      TopDoctorApiMiddleware,
@@ -22,6 +22,7 @@ export const StoreMiddlewaresArray: Middleware[] = [
      MentorApiMiddleware,
      VideoCallApiMiddleware,
      MentorCallMiddleware,
+     MentorCommentMiddleware,
 ];
 
 export const AppStore = configureStore({

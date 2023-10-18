@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { IDoctorProps } from "../../interface/top-doctor.interface";
 import { baseQueryUser } from "../../utils";
+import { IMentorProps } from "../../interface";
 
 const doctorApi = createApi({
      reducerPath: "doctorApi",
@@ -12,7 +13,7 @@ const doctorApi = createApi({
           GetOnlineDoctors: query<{ data: IDoctorProps[] }, void>({
                query: () => `/doctor/status/online`,
           }),
-          GetDoctorById: mutation({
+          GetDoctorById: mutation<{ data: IMentorProps }, string>({
                query: (id: string) => {
                     return {
                          url: `/doctor/${id}`,

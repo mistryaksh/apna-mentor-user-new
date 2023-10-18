@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { MentorLayout } from "../../../../layout";
 import DataTable from "react-data-table-component";
 import { AiOutlineCopy, AiOutlineVideoCamera } from "react-icons/ai";
@@ -7,6 +7,7 @@ import { AppButton } from "../../../../component";
 import { useNavigate } from "react-router-dom";
 import { useGetMyVideoCallsQuery, useMentorProfileQuery } from "../../../../app/apis";
 import moment from "moment";
+import Timer from "../../../../component/call-timer";
 
 export const MentorMyCallsPage = () => {
      const { data: mentor } = useMentorProfileQuery();
@@ -43,6 +44,7 @@ export const MentorMyCallsPage = () => {
                          </AppButton>
                     </div>
                </div>
+
                {isCallHistoryLoading && <div>Loading...</div>}
                {!isCallHistoryLoading && calls?.data?.length !== 0 && calls?.data?.length !== 0 && (
                     <div>
@@ -70,22 +72,28 @@ export const MentorMyCallsPage = () => {
                                         center: true,
                                         id: "username",
                                         name: "user name",
-                                        selector: (row: any) =>
+                                        width: "180px",
+                                        cell: (row: any) =>
                                              `${row.userOne.name.firstName} ${row.userOne.name.lastName}`,
                                    },
                                    {
                                         center: true,
                                         id: "CreatedAt",
-                                        name: "Call On",
+                                        name: "Received On",
                                         width: "200px",
-                                        selector: (row: any) => moment(row.createdAt).format("MMM Do YYYY h:mm:ss A"),
+                                        selector: (row: any) => moment(row.createdAt).format("DD MMM YY h:mm A"),
                                    },
                                    {
                                         center: true,
                                         id: "UpdatedAt",
-                                        name: "Completed On",
+                                        name: "Duration",
                                         width: "200px",
-                                        selector: (row: any) => moment(row.updatedAt).format("MMM Do YYYY h:mm:ss A"),
+                                        cell: (row: any) => {
+                                             var TimeA = moment(row.createdAt);
+                                             var TimeB = moment(row.updatedAt);
+                                             var DiffAB = moment.utc(moment(TimeB).diff(moment(TimeA)));
+                                             return <p>{DiffAB.format("HH:mm:ss")}</p>;
+                                        },
                                    },
 
                                    {
@@ -148,6 +156,8 @@ export const MentorMyCallsPage = () => {
                                         id: "action",
                                         name: "actions",
                                         center: true,
+                                        width: "200px",
+
                                         cell: ({ status }) => (
                                              <div>
                                                   <button type="button" className="text-red-500">

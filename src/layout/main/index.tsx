@@ -77,8 +77,8 @@ export const MainLayout: FC<MainLayoutProps> = ({ children, loading, mode }) => 
      const { navBar } = useLayoutSlice();
      const { user } = useAccountSlice();
      const dispatch = useAppDispatch();
-     const { token } = useVideoChatSlice();
      const navigate = useNavigate();
+     const { token } = useVideoChatSlice();
      const [Logout, { isError, error, isSuccess, data }] = useLogoutToAccountMutation();
      const [GenerateToken, { data: tokenData, isError: isTokenError, error: tokenError, isSuccess: isTokenSuccess }] =
           useGenerateTokenMutation();
@@ -96,6 +96,7 @@ export const MainLayout: FC<MainLayoutProps> = ({ children, loading, mode }) => 
                dispatch(UserLogoutState());
                navigate("/", { replace: true });
           }
+
           if (!token) {
                (async () => {
                     await GenerateToken();
@@ -109,7 +110,7 @@ export const MainLayout: FC<MainLayoutProps> = ({ children, loading, mode }) => 
                }
           }
           if (isTokenSuccess) {
-               dispatch(handleToken(tokenData.data));
+               dispatch(handleToken(tokenData?.data));
           }
      }, [
           isError,
@@ -121,9 +122,9 @@ export const MainLayout: FC<MainLayoutProps> = ({ children, loading, mode }) => 
           isTokenError,
           tokenError,
           isTokenSuccess,
-          tokenData,
           GenerateToken,
           token,
+          tokenData,
      ]);
 
      const onLogout = async () => {

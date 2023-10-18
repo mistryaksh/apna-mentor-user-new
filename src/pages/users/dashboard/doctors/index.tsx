@@ -13,7 +13,7 @@ export const AllDoctorPage = () => {
           <MainLayout mode="navigation">
                <div className="container mx-auto p-3 py-10">
                     <div className="flex items-center gap-5 justify-start flex-wrap">
-                         <button className="px-3 py-2" onClick={() => navigate("/dashboard")}>
+                         <button className="px-3 py-2" onClick={() => navigate("/")}>
                               <BiArrowBack size={30} />
                          </button>
                          <h6 className="text-2xl">All Mentors</h6>
@@ -27,10 +27,8 @@ export const AllDoctorPage = () => {
                               {!isLoading &&
                                    data?.data.map(({ _id, name, comments, workDetails }) => (
                                         <DoctorCard
-                                             user={profile?.data._id as string}
                                              id={_id as string}
                                              key={_id}
-                                             comments={comments?.length as number}
                                              hospital={workDetails.hospital}
                                              name={name}
                                              specialization={workDetails.hospital.specialization}
